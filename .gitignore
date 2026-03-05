@@ -17,6 +17,7 @@ CIE_std_illum_D65.csv
 CIE_xyz_1931_2deg.csv
 *.xlsx
 *.gz
+*:Zone.Identifier
 
 # Docs
 *.docx
