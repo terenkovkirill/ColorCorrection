@@ -16,6 +16,7 @@ from train_lsq import (
     run_5fold,
     run_5fold_deltaE2000,
     mean_abs_error,
+    feature_dim,
 )
 
 from metrics import (
@@ -25,12 +26,17 @@ from metrics import (
 )
 
 
+METHOD_CHOICES = ("ls", "ls-p", "ls-rp")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--reflect_gz", required=True, help="Path to reflect_db.reflect.gz")
     ap.add_argument("--nikon_xlsx", required=True, help="Path to nikon.xlsx (D5100 sensitivities)")
     ap.add_argument("--cie_d65_csv", required=True, help="Path to CIE_std_illum_D65.csv")
     ap.add_argument("--cie_cmf_csv", required=True, help="Path to CIE_xyz_1931_2deg.csv")
+    ap.add_argument("--method", choices=METHOD_CHOICES, default="ls",
+                    help="Colour correction method: ls, ls-p, or ls-rp")
     ap.add_argument("--exposure", type=float, default=1.0, help="Exposure multiplier (default 1.0)")
     ap.add_argument("--ridge", type=float, default=0.0, help="Optional ridge regularization (default 0)")
     ap.add_argument("--seed", type=int, default=42, help="Random seed for 5-fold split")
@@ -61,11 +67,17 @@ def main():
         exposure=args.exposure,
     )
     print(f"  P (RGB): {P.shape}, X (XYZ): {X.shape}")
+    print(f"  method: {args.method}, feature_dim: {feature_dim(args.method)}")
 
     XYZ_white = compute_white_xyz(refl.wl, cmf, d65)
 
-    de_stats = run_5fold_deltaE2000(P, X, XYZ_white, ridge=args.ridge, seed=args.seed)
-    print("\n5-fold CV (DeltaE2000):")
+    de_stats = run_5fold_deltaE2000(
+        P, X, XYZ_white,
+        ridge=args.ridge,
+        seed=args.seed,
+        method=args.method,
+    )
+    print(f"\n5-fold CV (DeltaE2000, method={args.method}):")
     print("  fold_mean:", np.array2string(de_stats["fold_mean"], precision=6))
     print("  fold_p95 :", np.array2string(de_stats["fold_p95"], precision=6))
     print("  mean(mean):", de_stats["mean_of_means"])
@@ -73,19 +85,19 @@ def main():
     print("  mean(p95):", de_stats["mean_of_p95"])
     print("  max(p95):", de_stats["max_p95"])
 
-    stats = run_5fold(P, X, ridge=args.ridge, seed=args.seed)
-    print("\n5-fold CV (XYZ MAE):")
+    stats = run_5fold(P, X, ridge=args.ridge, seed=args.seed, method=args.method)
+    print(f"\n5-fold CV (XYZ MAE, method={args.method}):")
     print("  fold_mae:", np.array2string(stats["fold_mae"], precision=6))
     print("  mean   :", stats["mean"])
     print("  median :", stats["median"])
     print("  min    :", stats["min"])
     print("  max    :", stats["max"])
 
-    M = fit_ls_matrix(P, X, ridge=args.ridge)
-    print("\nFinal LS matrix M (3x3) for RGB -> XYZ:")
+    M = fit_ls_matrix(P, X, ridge=args.ridge, method=args.method)
+    print(f"\nFinal regression matrix M ({feature_dim(args.method)}x3) for method={args.method}:")
     print(M)
 
-    Xp_all = predict_xyz(P, M)
+    Xp_all = predict_xyz(P, M, method=args.method)
     print("\nTrain-set XYZ MAE:", mean_abs_error(Xp_all, X))
 
     Lab_p_all = xyz_to_lab(Xp_all, XYZ_white)
