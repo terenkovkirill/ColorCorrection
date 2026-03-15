@@ -16,9 +16,7 @@ $\mathbf p = (R,G,B)^\top \mapsto \hat{\mathbf x} = (X,Y,Z)^\top$
 
 где отклик камеры переводится в эталонное пространство **CIE XYZ**, после чего качество оценивается в **CIELAB** по метрике
 
-$
-\Delta E_{2000}(Lab(\hat{\mathbf x}), Lab(\mathbf x)).
-$
+$\Delta E_{2000}(Lab(\hat{\mathbf x}), Lab(\mathbf x)).$
 
 Используемый вычислительный конвейер:
 
@@ -58,15 +56,11 @@ $
 
 к более богатым root-polynomial признакам 3-го и 4-го порядка, например
 
-$
-(R^2G)^{1/3},\quad (RGB)^{1/3},\quad (R^3G)^{1/4},\quad (R^2GB)^{1/4}.
-$
+$(R^2G)^{1/3},\quad (RGB)^{1/3},\quad (R^3G)^{1/4},\quad (R^2GB)^{1/4}.$
 
 Такие признаки сохраняют однородность по экспозиции:
 
-$
-\phi(\alpha R,\alpha G,\alpha B)=\alpha\,\phi(R,G,B),\qquad \alpha>0.
-$
+$\phi(\alpha R,\alpha G,\alpha B)=\alpha\,\phi(R,G,B),\qquad \alpha>0.$
 
 ---
 
@@ -81,9 +75,7 @@ $
 
 Оптимизационная постановка имеет вид
 
-$
-M^*=\arg\min_M \Bigl(\mathcal L(M)+\lambda\|M\|_F^2\Bigr),
-$
+$M^*=\arg\min_M \Bigl(\mathcal L(M)+\lambda\|M\|_F^2\Bigr),$
 
 где $\mathcal L$ — либо ошибка в пространстве Lab, либо средняя perceptual-ошибка $\Delta E_{2000}$.
 
@@ -172,15 +164,11 @@ make run-lsrp4opt-de2000 OPT_STARTS=10 AUTO_RIDGE=1
 3. Расширенные методы **LS-RP3**, **LS-RP4**, **LS-RP3-Opt**, **LS-RP4-Opt** показывают лучший результат, чем исходные классические методы из статьи.
 4. Лучший результат в текущем проекте по среднему значению ошибки достигается у **LS-RP4** и **LS-RP4-Opt**:
 
-   $
-   \text{Mean}=0.64.
-   $
+   $\text{Mean}=0.64.$
 
 5. Лучший хвост распределения ошибок среди расширенных методов достигается у **LS-RP3-Opt** и **LS-RP4-Opt**:
 
-   $
-      95\%=1.94.
-   $
+   $95\%=1.94.$
 
 ---
 
